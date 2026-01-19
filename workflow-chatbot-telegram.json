@@ -1,0 +1,228 @@
+{
+  "name": "workflow-chatbot-telegram",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -32,
+        -160
+      ],
+      "id": "a4c34e81-e2ee-482d-aaf3-75234f8ec0b6",
+      "name": "Telegram Trigger",
+      "webhookId": "50d09fa2-c1d7-40f6-9e75-9b4268ee7411",
+      "credentials": {
+        "telegramApi": {
+          "id": "NQKNeaoZJQbMEdiq",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "efceb00e-0dad-4c8c-a552-874e1a9ba72f",
+              "name": "=queue",
+              "value": "={{ $('Telegram Trigger').item.json.message.text.toString().toLowerCase().trim().replace(/\\s*,\\s*/g, \",\") }},br",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "ignoreConversionErrors": false,
+          "dotNotation": false
+        }
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        192,
+        -160
+      ],
+      "id": "980241fc-9ee1-4395-b4fc-02d073728270",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=❌ Cidade não encontrada. Use o formato Cidade,UF (ex.: São Paulo,SP).",
+        "additionalFields": {
+          "appendAttribution": false,
+          "disable_notification": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        672,
+        -48
+      ],
+      "id": "c6d57e5a-3293-4cae-9196-44d06b7482ae",
+      "name": "Mensagem de erro",
+      "webhookId": "c05dde78-159f-46b3-973b-f676d607b5b6",
+      "credentials": {
+        "telegramApi": {
+          "id": "NQKNeaoZJQbMEdiq",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=🌤️ A temperatura em {{ $json.name }} é de {{ Math.round($json.main.temp) }}°C.",
+        "additionalFields": {
+          "appendAttribution": false,
+          "disable_notification": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        672,
+        -240
+      ],
+      "id": "db7697b6-46ba-4d9d-a104-96029647f7b1",
+      "name": "Temperatura Atual",
+      "webhookId": "c05dde78-159f-46b3-973b-f676d607b5b6",
+      "credentials": {
+        "telegramApi": {
+          "id": "NQKNeaoZJQbMEdiq",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.openweathermap.org/data/2.5/weather",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $json.queue }}"
+            },
+            {
+              "name": "appid",
+              "value": "={{ $env.OPENWEATHER_API_KEY }}"
+            },
+            {
+              "name": "units",
+              "value": "Metric"
+            },
+            {
+              "name": "lang",
+              "value": "pt_br"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        416,
+        -160
+      ],
+      "id": "c2f86894-59d8-417d-bb18-0cad7812e463",
+      "name": "OpenWeather",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        928,
+        -144
+      ],
+      "id": "cdab8d0b-a0a1-4450-9d07-8548b3b94fdb",
+      "name": "Fim"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "OpenWeather",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensagem de erro": {
+      "main": [
+        [
+          {
+            "node": "Fim",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Temperatura Atual": {
+      "main": [
+        [
+          {
+            "node": "Fim",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenWeather": {
+      "main": [
+        [
+          {
+            "node": "Temperatura Atual",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mensagem de erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "f4b1e365-7f1d-45d2-b0ef-5b4eaf48cfd3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "90e85f651333b5a2cc6ffd21db0aaeb8c8caa5545cb3e99914859f16e84ef73a"
+  },
+  "id": "7bXzkI-uE4119Y4DzYHYa",
+  "tags": []
+}
