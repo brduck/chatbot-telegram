@@ -2,6 +2,8 @@
 
 Este repositório contém um workflow automatizado para o **n8n** que atua como um chatbot no Telegram. O bot recebe o nome de uma cidade, consulta a API da OpenWeather e utiliza a **IA do Google Gemini** para gerar uma resposta natural. Caso a IA falhe, o sistema possui um fallback automático.
 
+![Screenshot do Workflow](./image.png)
+
 ## 📋 Funcionalidades
 
 - **Recebimento de Mensagens:** Telegram Trigger.
