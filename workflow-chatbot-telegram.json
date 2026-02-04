@@ -17,7 +17,7 @@
             },
             {
               "name": "units",
-              "value": "Metric"
+              "value": "metric"
             },
             {
               "name": "lang",
@@ -30,12 +30,12 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
       "position": [
-        -640,
-        288
+        -208,
+        368
       ],
-      "id": "aac472c4-b5e6-4167-8f27-967d79e0a0c4",
+      "id": "f21f44ef-a56e-4d7f-b9fb-dddd17b37e78",
       "name": "OpenWeather",
-      "onError": "continueErrorOutput"
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -54,10 +54,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        48,
-        144
+        752,
+        352
       ],
-      "id": "2e0de2b9-feab-41ef-b638-e9d4c107087e",
+      "id": "ebc69c1d-e03a-42c4-8f61-2cd1f76a6385",
       "name": "Definir Fallback"
     },
     {
@@ -65,10 +65,10 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        704,
-        272
+        1152,
+        352
       ],
-      "id": "e6d203fd-c942-4452-804d-081442cdad65",
+      "id": "35f75452-2266-46c0-9908-dafdb730e61d",
       "name": "Fim"
     },
     {
@@ -93,10 +93,10 @@
       "type": "@n8n/n8n-nodes-langchain.googleGemini",
       "typeVersion": 1.1,
       "position": [
-        -384,
-        32
+        176,
+        256
       ],
-      "id": "0c72afc8-ee82-4bd2-a649-2b667b276de6",
+      "id": "2aaef1cb-247a-4d3c-a9af-5ede30801913",
       "name": "Gerar resposta com IA",
       "credentials": {
         "googlePalmApi": {
@@ -104,7 +104,7 @@
           "name": "Google Gemini(PaLM) Api account"
         }
       },
-      "onError": "continueErrorOutput"
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -116,10 +116,10 @@
       "type": "n8n-nodes-base.telegramTrigger",
       "typeVersion": 1.2,
       "position": [
-        -944,
-        288
+        -512,
+        368
       ],
-      "id": "4a4ee963-6bd4-44af-a4c2-0a6283cce79d",
+      "id": "6372cfc8-e014-4316-9831-515c1a10f814",
       "name": "Receber Mensagem",
       "webhookId": "50d09fa2-c1d7-40f6-9e75-9b4268ee7411",
       "credentials": {
@@ -136,7 +136,7 @@
             {
               "id": "efceb00e-0dad-4c8c-a552-874e1a9ba72f",
               "name": "=queue",
-              "value": "={{ $('Receber Mensagem').item.json.message.text.toString().toLowerCase().trim().replace(/\\s*,\\s*/g, \",\") }},br",
+              "value": "={{ $('Receber Mensagem').item.json.message.text.toString().toLowerCase().trim().normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g, \"\").replace(/\\s*,\\s*/g, \",\") }},br",
               "type": "string"
             }
           ]
@@ -149,10 +149,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -784,
-        288
+        -352,
+        368
       ],
-      "id": "1a7c9c8f-e1b2-4429-92b8-062dc92dc59f",
+      "id": "d79d768f-7b49-48ba-868d-bc81efbd5065",
       "name": "Formatar Cidade"
     },
     {
@@ -172,10 +172,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        48,
-        -64
+        752,
+        160
       ],
-      "id": "8795ce42-f12d-4585-a306-bb77164d6f1a",
+      "id": "d7169428-7853-469d-82bb-5106c295329c",
       "name": "Formatar Resposta da IA"
     },
     {
@@ -190,10 +190,10 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        320,
-        48
+        944,
+        224
       ],
-      "id": "0c5dc56b-787c-489a-8360-049dd02d8050",
+      "id": "71706e6b-dfa4-4fe1-b548-e1e090fd2f21",
       "name": "Enviar Temperatura Atual",
       "webhookId": "c05dde78-159f-46b3-973b-f676d607b5b6",
       "credentials": {
@@ -202,6 +202,93 @@
           "name": "Telegram account"
         }
       }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1af4947-f58c-4a11-8072-a0d0144d9f67",
+              "leftValue": "={{ $json.cod }}",
+              "rightValue": 200,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "7f6bfb5b-c366-4857-a7a2-a239e46762e5",
+              "leftValue": "={{ $json.main.temp }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "5a40cb9a-e7ee-4a6f-b618-a66b08ae1096",
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -48,
+        368
+      ],
+      "id": "3fe61804-3060-4307-aa1a-cfab42d873c4",
+      "name": "Validar Resposta API"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ea69c7b9-b2e5-4dc5-b39b-367db4e39c86",
+              "leftValue": "={{ $json.candidates[0].content.parts[0].text }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        512,
+        256
+      ],
+      "id": "b708f42b-ecfe-439b-87a6-a264ff95610d",
+      "name": "Validar Resposta IA"
     },
     {
       "parameters": {
@@ -215,10 +302,10 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        320,
-        416
+        880,
+        560
       ],
-      "id": "b9d0773f-cb61-4a0e-8351-b9d0a103a2e3",
+      "id": "70d79bc5-c705-4e25-bd3e-e3802c68bc74",
       "name": "Enviar erro",
       "webhookId": "c05dde78-159f-46b3-973b-f676d607b5b6",
       "credentials": {
@@ -235,18 +322,12 @@
       "main": [
         [
           {
-            "node": "Gerar resposta com IA",
+            "node": "Validar Resposta API",
             "type": "main",
             "index": 0
           }
         ],
-        [
-          {
-            "node": "Enviar erro",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Definir Fallback": {
@@ -264,18 +345,12 @@
       "main": [
         [
           {
-            "node": "Formatar Resposta da IA",
+            "node": "Validar Resposta IA",
             "type": "main",
             "index": 0
           }
         ],
-        [
-          {
-            "node": "Definir Fallback",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Receber Mensagem": {
@@ -322,6 +397,42 @@
         ]
       ]
     },
+    "Validar Resposta API": {
+      "main": [
+        [
+          {
+            "node": "Gerar resposta com IA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar erro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Resposta IA": {
+      "main": [
+        [
+          {
+            "node": "Formatar Resposta da IA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Definir Fallback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Enviar erro": {
       "main": [
         [
@@ -337,12 +448,13 @@
   "active": false,
   "settings": {
     "executionOrder": "v1",
+    "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "02795326-7137-459c-901b-7552f8849481",
+  "versionId": "174c7147-e371-4d60-89cc-d9c2026c25a3",
   "meta": {
     "instanceId": "90e85f651333b5a2cc6ffd21db0aaeb8c8caa5545cb3e99914859f16e84ef73a"
   },
-  "id": "4QdSIjVkyEUKLVqqqRH5C",
+  "id": "raqFlMvc1vRyLBGct886k",
   "tags": []
 }
