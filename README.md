@@ -6,7 +6,10 @@ Este repositório contém um workflow automatizado para o **n8n** que atua como 
 
 ## 📋 Funcionalidades
 
-- **Recebimento de Mensagens:** Telegram Trigger.
+- **Recebimento de Mensagens (Telegram):**
+  - Utiliza o node **Telegram Trigger** configurado para disparar a cada nova mensagem (**Trigger: On Message**).
+- **Envio de Respostas (Telegram):**
+  - Utiliza nodes configurados com Resource **Message** e Operation **Send Message** para enviar as respostas ao usuário.
 - **Tratamento de Dados:** Normalização de texto (remoção de acentos, espaços extras e formatação compatível com a API).
 - **Integração de API:** Consulta ao endpoint da OpenWeather.
 - **Resposta Inteligente (IA):**
